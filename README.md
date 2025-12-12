@@ -4,13 +4,25 @@ WSL上のUbuntuで、毎日決まった時間にapt/brewの自動アップデー
 
 ## 概要
 
-- **実行内容**: apt update/upgrade → brew update/upgrade → スリープ復帰
+- **実行内容**: apt update/upgrade → brew update/upgrade → スリープ
 - **実行時刻**: 毎日午前3時(変更可能)
 - **動作**: スリープ中でも指定時刻に自動起動して実行
 
 ## セットアップ手順
 
-### 1. スリープ解除を許可する設定
+### 0. 自動セットアップ(推奨)
+
+管理者権限のPowerShellで実行:
+
+```powershell
+C:\Scripts\setup-auto-update.ps1
+```
+
+その後、画面の指示に従ってキーボードのウェイク設定を手動で行ってください。
+
+### 手動セットアップ
+
+#### 1. スリープ解除を許可する設定
 
 管理者権限のPowerShellで実行:
 
@@ -18,10 +30,26 @@ WSL上のUbuntuで、毎日決まった時間にapt/brewの自動アップデー
 # RTCウェイクタイマーの有効化
 powercfg -setacvalueindex SCHEME_CURRENT SUB_SLEEP RTCWAKE 1
 powercfg -setdcvalueindex SCHEME_CURRENT SUB_SLEEP RTCWAKE 1
+
+# USBセレクティブサスペンドを無効化
+powercfg -setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0
+powercfg -setdcvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0
+
+# 設定を適用
 powercfg -setactive SCHEME_CURRENT
 ```
 
-### 2. タスクスケジューラへ登録
+#### 2. キーボードウェイク設定
+
+デバイスマネージャーで設定:
+
+1. `Win + X` → デバイスマネージャー
+2. 「キーボード」を展開
+3. 使用しているキーボードを右クリック → プロパティ
+4. 「電源の管理」タブ
+5. ☑ `このデバイスで、コンピューターのスタンバイ状態を解除できるようにする`
+
+#### 3. タスクスケジューラへ登録
 
 管理者権限のPowerShellで実行:
 
@@ -39,7 +67,8 @@ schtasks /create /tn "WSL System Update" /xml C:\Scripts\wsl-update-task.xml /f
 schtasks /run /tn "WSL System Update"
 
 # ログ確認
-Get-Content C:\Scripts\wsl-update.log -Tail 30
+Start-Sleep -Seconds 30
+Get-Content C:\Scripts\wsl-update.log -Tail 50
 ```
 
 ## 設定変更
@@ -69,7 +98,7 @@ which brew
 
 ```powershell
 # 最新のログを表示
-Get-Content C:\Scripts\wsl-update.log -Tail 30
+Get-Content C:\Scripts\wsl-update.log -Tail 50
 
 # ログ全体を表示
 Get-Content C:\Scripts\wsl-update.log
@@ -90,11 +119,6 @@ schtasks /delete /tn "WSL System Update" /f
 # タスクの状態確認
 Get-ScheduledTask -TaskName "WSL System Update" | Get-ScheduledTaskInfo
 ```
-
-イベントビューアでエラー確認:
-
-- `Win + R` → `eventvwr.msc`
-- Windowsログ → アプリケーション
 
 ### スリープに戻らない
 

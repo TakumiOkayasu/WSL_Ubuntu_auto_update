@@ -1,33 +1,77 @@
 # ログファイルパス
 $logFile = "C:\Scripts\wsl-update.log"
 
-# ログ出力開始
-"=== Windows Task Started at $(Get-Date) ===" | Out-File -Append -Encoding utf8BOM $logFile
+# ログ出力関数
+function Write-Log {
+    param([string]$Message)
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    # Windows PowerShell 5.1では utf8 を使用
+    "[$timestamp] $Message" | Out-File -Append -Encoding utf8 $logFile
+}
+
+# ログファイル初期化
+"=== Log started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===" | Out-File -FilePath $logFile -Encoding utf8
+
+Write-Log "Windows Task Started"
+Write-Log "PowerShell Version: $($PSVersionTable.PSVersion)"
 
 try {
-    # apt更新(rootで実行)
-    "Running apt update..." | Out-File -Append -Encoding utf8BOM $logFile
-    wsl -u root -- bash -c "apt update && DEBIAN_FRONTEND=noninteractive apt upgrade -y" 2>&1 | Out-File -Append -Encoding utf8BOM $logFile
+    # apt-get更新(rootで実行)
+    Write-Log "Running apt-get update and upgrade..."
+    $aptResult = wsl -u root -- bash -c "apt-get update 2>&1 && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y 2>&1"
+    $aptResult | Where-Object { 
+        $_ -and 
+        $_ -notmatch "RemoteException" -and 
+        $_ -notmatch "^$"
+    } | ForEach-Object { Write-Log $_ }
     
-    # brew更新(一般ユーザーで実行)
-    "Running brew update..." | Out-File -Append -Encoding utf8BOM $logFile
-    wsl -- bash -c "eval `$(/home/linuxbrew/.linuxbrew/bin/brew shellenv) && brew update && brew upgrade" 2>&1 | Out-File -Append -Encoding utf8BOM $logFile
+    # brew更新
+    Write-Log "Running brew update..."
+    $brewUpdateResult = wsl -- /home/linuxbrew/.linuxbrew/bin/brew update 2>&1
+    $brewUpdateResult | Where-Object { 
+        $_ -and $_ -notmatch "^$" 
+    } | ForEach-Object { Write-Log $_ }
     
-    "Updates completed. Exit Code: $LASTEXITCODE" | Out-File -Append -Encoding utf8BOM $logFile
+    # brew upgrade
+    Write-Log "Running brew upgrade..."
+    $brewUpgradeResult = wsl -- /home/linuxbrew/.linuxbrew/bin/brew upgrade 2>&1
+    $brewUpgradeResult | Where-Object { 
+        $_ -and $_ -notmatch "^$"
+    } | ForEach-Object { 
+        $cleaned = $_ -replace '[^\x20-\x7E]', ''
+        $cleaned = $cleaned.Trim()
+        if ($cleaned) {
+            Write-Log $cleaned
+        }
+    }
+    
+    Write-Log "Updates completed successfully"
     
     # 少し待機
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 3
     
     # スリープ実行
-    "Entering sleep mode..." | Out-File -Append -Encoding utf8BOM $logFile
-    "=== Task Completed at $(Get-Date) ===" | Out-File -Append -Encoding utf8BOM $logFile
-    "" | Out-File -Append -Encoding utf8BOM $logFile
+    Write-Log "Entering sleep mode..."
     
-    Add-Type -AssemblyName System.Windows.Forms
-    $null = [System.Windows.Forms.Application]::SetSuspendState([System.Windows.Forms.PowerState]::Suspend, $false, $false)
+    try {
+        Add-Type -AssemblyName System.Windows.Forms
+        $sleepResult = [System.Windows.Forms.Application]::SetSuspendState(
+            [System.Windows.Forms.PowerState]::Suspend,
+            $false,
+            $false
+        )
+        Write-Log "Sleep initiated successfully"
+    }
+    catch {
+        Write-Log "SetSuspendState failed: $_"
+        Write-Log "Trying alternative method..."
+        & rundll32.exe powrprof.dll,SetSuspendState 0,1,0
+    }
+    
+    Write-Log "=== Task Completed ==="
 }
 catch {
-    "Error occurred: $_" | Out-File -Append -Encoding utf8BOM $logFile
-    "=== Task Failed at $(Get-Date) ===" | Out-File -Append -Encoding utf8BOM $logFile
-    "" | Out-File -Append -Encoding utf8BOM $logFile
+    Write-Log "ERROR: $_"
+    Write-Log "=== Task Failed ==="
+    exit 1
 }
