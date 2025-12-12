@@ -5,12 +5,11 @@ $logFile = "C:\Scripts\wsl-update.log"
 function Write-Log {
     param([string]$Message)
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    # Windows PowerShell 5.1では utf8 を使用
-    "[$timestamp] $Message" | Out-File -Append -Encoding utf8 $logFile
+    "[$timestamp] $Message" | Out-File -Append -Encoding utf8BOM $logFile
 }
 
 # ログファイル初期化
-"=== Log started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===" | Out-File -FilePath $logFile -Encoding utf8
+"=== Log started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===" | Out-File -FilePath $logFile -Encoding utf8BOM
 
 Write-Log "Windows Task Started"
 Write-Log "PowerShell Version: $($PSVersionTable.PSVersion)"

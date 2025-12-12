@@ -14,7 +14,8 @@
 	</Triggers>
 	<Principals>
 		<Principal>
-			<UserId>S-1-5-18</UserId>
+			<UserId>okayasu</UserId>
+			<LogonType>Password</LogonType>
 			<RunLevel>HighestAvailable</RunLevel>
 		</Principal>
 	</Principals>
@@ -39,7 +40,8 @@
 	</Settings>
 	<Actions Context="Author">
 		<Exec>
-			<Command>C:\Scripts\run-update.bat</Command>
+			<Command>C:\Program Files\PowerShell\7\pwsh.exe</Command>
+			<Arguments>-ExecutionPolicy Bypass -File C:\Scripts\wsl-update.ps1</Arguments>
 		</Exec>
 	</Actions>
 </Task>
