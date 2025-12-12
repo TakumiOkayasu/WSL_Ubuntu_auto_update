@@ -18,13 +18,14 @@ try {
     # 少し待機
     Start-Sleep -Seconds 5
     
-    # スリープ実行
+    # スリープ実行(スタートボタンと同じ方法)
     "Entering sleep mode..." | Out-File -Append -Encoding utf8BOM $logFile
     "=== Task Completed at $(Get-Date) ===" | Out-File -Append -Encoding utf8BOM $logFile
     "" | Out-File -Append -Encoding utf8BOM $logFile
     
-    Add-Type -Assembly System.Windows.Forms
-    [System.Windows.Forms.Application]::SetSuspendState('Suspend', $false, $false)
+    # psshutdownまたはNirCmdを使う方法もあるが、標準的な方法:
+    Add-Type -AssemblyName System.Windows.Forms
+    $null = [System.Windows.Forms.Application]::SetSuspendState([System.Windows.Forms.PowerState]::Suspend, $false, $false)
 }
 catch {
     "Error occurred: $_" | Out-File -Append -Encoding utf8BOM $logFile
