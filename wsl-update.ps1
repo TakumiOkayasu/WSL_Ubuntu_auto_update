@@ -60,28 +60,6 @@ function Invoke-ClaudeUpdate {
     Write-CommandOutput -Output $result
 }
 
-function Invoke-Suspend {
-    Write-Log "Entering sleep mode..."
-    try {
-        Add-Type -AssemblyName System.Windows.Forms
-        $sleepResult = [System.Windows.Forms.Application]::SetSuspendState(
-            [System.Windows.Forms.PowerState]::Suspend,
-            $false,
-            $false
-        )
-        if ($sleepResult) {
-            Write-Log "Sleep initiated successfully"
-            return
-        }
-        Write-Log "SetSuspendState returned false, trying fallback..."
-    }
-    catch {
-        Write-Log "SetSuspendState failed: $_"
-        Write-Log "Trying alternative method..."
-    }
-    & rundll32.exe powrprof.dll,SetSuspendState 0,1,0
-}
-
 "=== Log started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===" | Out-File -FilePath $LogFile -Append -Encoding utf8BOM
 
 Write-Log "Windows Task Started"
@@ -94,7 +72,6 @@ try {
     Write-Log "Updates completed successfully"
 
     Start-Sleep -Seconds $PreSuspendDelaySec
-    Invoke-Suspend
 
     Write-Log "=== Task Completed ==="
 }
