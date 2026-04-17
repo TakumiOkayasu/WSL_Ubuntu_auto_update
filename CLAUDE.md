@@ -39,7 +39,7 @@ C:\Scripts\enable-mouse-wake.ps1
 
 ### トリガーチェーン
 
-```
+```text
 [任意] BIOS RTC Wake / Wake on LAN でシャットダウン状態の Windows を起動
   └─ OS ブート完了
        └─ タスクスケジューラ (BootTrigger, 30秒遅延, HighestAvailable, S4U)
@@ -53,7 +53,7 @@ C:\Scripts\enable-mouse-wake.ps1
 ### 設計上の固定事項 (変更時は影響箇所を要確認)
 
 | 項目 | 値 | 参照 |
-|------|-----|------|
+| ------ | ----- | ------ |
 | PowerShell バージョン | **pwsh 7** (`C:\Program Files\PowerShell\7\pwsh.exe`)。Windows PowerShell 5 ではない | `wsl-update-task-winps.xml` Actions セクション |
 | トリガー | `BootTrigger` (OS 起動時に発火、30秒遅延) | `wsl-update-task-winps.xml` Triggers セクション |
 | タスク実行ユーザー | `okayasu` にハードコード | `wsl-update-task-winps.xml` Principal セクション |
