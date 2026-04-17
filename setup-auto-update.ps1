@@ -1,30 +1,52 @@
-# WSL自動アップデート完全セットアップスクリプト
-# 管理者権限で実行してください
+[CmdletBinding()]
+param(
+    [string]$TaskXmlPath = "C:\Scripts\wsl-update-task-winps.xml",
+    [string]$TaskName = "WSL System Update"
+)
+
+Set-Variable -Name USB_SELECTIVE_SUSPEND_SUBGROUP -Value "2a737441-1930-4402-8d77-b2bebba308a3" -Option Constant
+Set-Variable -Name USB_SELECTIVE_SUSPEND_SETTING  -Value "48e6b7a6-50f5-4782-a5d4-53bb8f07e226" -Option Constant
+
+function Enable-WakeTimers {
+    powercfg -setacvalueindex SCHEME_CURRENT SUB_SLEEP RTCWAKE 1
+    powercfg -setdcvalueindex SCHEME_CURRENT SUB_SLEEP RTCWAKE 1
+}
+
+function Disable-UsbSelectiveSuspend {
+    powercfg -setacvalueindex SCHEME_CURRENT $USB_SELECTIVE_SUSPEND_SUBGROUP $USB_SELECTIVE_SUSPEND_SETTING 0
+    powercfg -setdcvalueindex SCHEME_CURRENT $USB_SELECTIVE_SUSPEND_SUBGROUP $USB_SELECTIVE_SUSPEND_SETTING 0
+}
+
+function Register-UpdateTask {
+    param(
+        [Parameter(Mandatory)][string]$XmlPath,
+        [Parameter(Mandatory)][string]$Name
+    )
+    if (-not (Test-Path $XmlPath)) {
+        Write-Host "ERROR: $XmlPath not found!" -ForegroundColor Red
+        exit 1
+    }
+    schtasks /create /tn $Name /xml $XmlPath /f
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: schtasks failed with exit code $LASTEXITCODE" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "Task registered successfully!" -ForegroundColor Green
+}
 
 Write-Host "=== WSL Auto Update Setup ===" -ForegroundColor Green
 
-# 1. スリープ解除を許可
 Write-Host "`n[1/4] Enabling wake timers..." -ForegroundColor Yellow
-powercfg -setacvalueindex SCHEME_CURRENT SUB_SLEEP RTCWAKE 1
-powercfg -setdcvalueindex SCHEME_CURRENT SUB_SLEEP RTCWAKE 1
+Enable-WakeTimers
 
-# 2. USBセレクティブサスペンドを無効化
 Write-Host "[2/4] Disabling USB selective suspend..." -ForegroundColor Yellow
-powercfg -setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0
-powercfg -setdcvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0
+Disable-UsbSelectiveSuspend
 
-# 3. 電源設定を適用
 Write-Host "[3/4] Applying power settings..." -ForegroundColor Yellow
 powercfg -setactive SCHEME_CURRENT
 
-# 4. タスクスケジューラに登録
 Write-Host "[4/4] Registering scheduled task..." -ForegroundColor Yellow
-if (Test-Path "C:\Scripts\wsl-update-task.xml") {
-    schtasks /create /tn "WSL System Update" /xml C:\Scripts\wsl-update-task.xml /f
-    Write-Host "Task registered successfully!" -ForegroundColor Green
-} else {
-    Write-Host "ERROR: C:\Scripts\wsl-update-task.xml not found!" -ForegroundColor Red
-}
+Register-UpdateTask -XmlPath $TaskXmlPath -Name $TaskName
 
 Write-Host "`n=== Setup Complete ===" -ForegroundColor Green
 Write-Host "`nIMPORTANT: Please configure keyboard wake manually:" -ForegroundColor Cyan
