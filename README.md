@@ -55,7 +55,7 @@ powercfg -setactive SCHEME_CURRENT
 
 ```powershell
 # タスクをインポート
-schtasks /create /tn "WSL System Update" /xml C:\Scripts\wsl-update-task.xml /f
+schtasks /create /tn "WSL System Update" /xml C:\Scripts\wsl-update-task-winps.xml /f
 ```
 
 ### 3. 動作確認(テスト実行)
@@ -75,7 +75,7 @@ Get-Content C:\Scripts\wsl-update.log -Tail 50
 
 ### 実行時刻の変更
 
-`C:\Scripts\wsl-update-task.xml` を編集:
+`C:\Scripts\wsl-update-task-winps.xml` を編集:
 
 ```xml
 <StartBoundary>2025-01-01T03:00:00</StartBoundary>
