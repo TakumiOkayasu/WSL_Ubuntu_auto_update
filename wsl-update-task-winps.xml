@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
 	<RegistrationInfo>
-		<Description>WSL System Update and Sleep</Description>
+		<Description>WSL System Update and Shutdown (triggered on boot)</Description>
 	</RegistrationInfo>
 	<Triggers>
-		<CalendarTrigger>
-			<StartBoundary>2025-01-01T03:00:00</StartBoundary>
+		<BootTrigger>
 			<Enabled>true</Enabled>
-			<ScheduleByDay>
-				<DaysInterval>1</DaysInterval>
-			</ScheduleByDay>
-		</CalendarTrigger>
+			<Delay>PT30S</Delay>
+		</BootTrigger>
 	</Triggers>
 	<Principals>
 		<Principal>
@@ -34,7 +31,7 @@
 		<Enabled>true</Enabled>
 		<Hidden>false</Hidden>
 		<RunOnlyIfIdle>false</RunOnlyIfIdle>
-		<WakeToRun>true</WakeToRun>
+		<WakeToRun>false</WakeToRun>
 		<ExecutionTimeLimit>PT1H</ExecutionTimeLimit>
 		<Priority>7</Priority>
 	</Settings>
