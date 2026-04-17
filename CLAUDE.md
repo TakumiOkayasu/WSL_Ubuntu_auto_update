@@ -53,6 +53,7 @@ C:\Scripts\enable-mouse-wake.ps1
 |------|-----|------|
 | PowerShell バージョン | **pwsh 7** (`C:\Program Files\PowerShell\7\pwsh.exe`)。Windows PowerShell 5 ではない | `wsl-update-task-winps.xml:43` |
 | タスク実行ユーザー | `okayasu` にハードコード | `wsl-update-task-winps.xml:17` |
+| ログオン方式 | `S4U` (パスワード不要・ログオフ中も実行可)。ネットワーク資格情報は不可 | `wsl-update-task-winps.xml:18` |
 | apt 実行権限 | `wsl -u root` (root で実行) | `wsl-update.ps1:20` |
 | brew パス | `/home/linuxbrew/.linuxbrew/bin/brew` にハードコード | `wsl-update.ps1:29,36` |
 | スクリプト配置 | `C:\Scripts\` 絶対パス前提 | 全ファイル |

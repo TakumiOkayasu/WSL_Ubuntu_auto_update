@@ -29,6 +29,7 @@ function Register-UpdateTask {
     schtasks /create /tn $Name /xml $XmlPath /f
     if ($LASTEXITCODE -ne 0) {
         Write-Host "ERROR: schtasks failed with exit code $LASTEXITCODE" -ForegroundColor Red
+        Write-Host "ヒント: XML の <LogonType> が Password の場合は /ru /rp が必要。S4U への変更を検討" -ForegroundColor Yellow
         exit 1
     }
     Write-Host "Task registered successfully!" -ForegroundColor Green
