@@ -15,7 +15,7 @@
 	<Principals>
 		<Principal>
 			<UserId>okayasu</UserId>
-			<LogonType>Password</LogonType>
+			<LogonType>S4U</LogonType>
 			<RunLevel>HighestAvailable</RunLevel>
 		</Principal>
 	</Principals>
