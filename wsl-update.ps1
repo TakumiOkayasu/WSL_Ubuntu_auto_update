@@ -54,6 +54,12 @@ function Invoke-BrewUpgrade {
     Write-CommandOutput -Output $upgradeResult -StripNonAscii
 }
 
+function Invoke-ClaudeUpdate {
+    Write-Log "Running claude update..."
+    $result = & claude update 2>&1
+    Write-CommandOutput -Output $result
+}
+
 function Invoke-Suspend {
     Write-Log "Entering sleep mode..."
     try {
@@ -84,6 +90,7 @@ Write-Log "PowerShell Version: $($PSVersionTable.PSVersion)"
 try {
     Invoke-AptUpgrade
     Invoke-BrewUpgrade -BrewBinary $BrewPath
+    Invoke-ClaudeUpdate
     Write-Log "Updates completed successfully"
 
     Start-Sleep -Seconds $PreSuspendDelaySec
